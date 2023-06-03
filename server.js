@@ -10,8 +10,10 @@ const config = {
   endpoint: process.env.COSMOS_ENDPOINT,
   key: process.env.COSMOS_KEY,
   databaseId: process.env.COSMOS_DB_ID,
-  containerId: process.env.CONTAINER_ID
+  containerId: process.env.COSMOS_CONTAINER_ID,
 };
+
+//console.log(config)
 
 const client = new CosmosClient({
   endpoint: config.endpoint,
