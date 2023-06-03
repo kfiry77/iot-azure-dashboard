@@ -37,13 +37,11 @@ td {
   <table>
     <thead>
       <tr>
-<!--        <th>ID</th> -->
         <th>Time</th>
         <th>Device</th>
         <th>Download Speed</th>
         <th>Upload Speed</th>
         <th>Ping Latency</th>
-        <!-- Add more table headers as needed for your data -->
       </tr>
     </thead>
     <tbody>
@@ -59,7 +57,6 @@ td {
         return formattedDate;  } %>
       <% data.forEach(item => { %>
         <tr>
-<!--          <td><%= item.id %></td> -->
           <td><%= formatDate(item._ts * 1000)  %></td>
           <td><%= item.SystemProperties['iothub-connection-device-id']  %></td>
           <td><%= JSON.parse(item.Body).download_speed %></td>
