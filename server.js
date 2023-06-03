@@ -7,10 +7,10 @@ app.set('view engine', 'ejs');
 app.use(express.static('public', { 'extensions': ['html', 'css'] }));
 
 const config = {
-  endpoint: 'https://kfiry-cosmos.documents.azure.com:443',
-  key: 'apPuEtn4do6LcTnjP0uWk93nCH1PiTQ4cC0m4mS48tmeWWglX99wTfaF91BdR2yO2UfhNm11xOKMACDbJlTvCA==',
-  databaseId: 'IotHub',
-  containerId: 'telemetric',
+  endpoint: process.env.COSMOS_ENDPOINT,
+  key: process.env.COSMOS_KEY,
+  databaseId: process.env.COSMOS_DB_ID,
+  containerId: process.env.CONTAINER_ID
 };
 
 const client = new CosmosClient({
