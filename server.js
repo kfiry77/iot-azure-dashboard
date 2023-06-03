@@ -13,7 +13,7 @@ const config = {
   containerId: process.env.COSMOS_CONTAINER_ID,
 };
 
-//console.log(config)
+console.log(config)
 
 const client = new CosmosClient({
   endpoint: config.endpoint,
