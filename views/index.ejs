@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Speed Test Reports</title>
+  <style> 
+  body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  font-size: 10px; 
+}
+
+th {
+  background-color: #f2f2f2;
+  padding: 10px; 
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+td {
+  padding: 10px; 
+}
+  </style>
+</head>
+<body>
+  <h1>Speed Test Reports</h1>
+  <table>
+    <thead>
+      <tr>
+<!--        <th>ID</th> -->
+        <th>Time</th>
+        <th>Device</th>
+        <th>Download Speed</th>
+        <th>Upload Speed</th>
+        <th>Ping Latency</th>
+        <!-- Add more table headers as needed for your data -->
+      </tr>
+    </thead>
+    <tbody>
+      <% function formatDate(date) {
+        const formattedDate = new Date(date).toLocaleString('en-US', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    
+        return formattedDate;  } %>
+      <% data.forEach(item => { %>
+        <tr>
+<!--          <td><%= item.id %></td> -->
+          <td><%= formatDate(item._ts * 1000)  %></td>
+          <td><%= item.SystemProperties['iothub-connection-device-id']  %></td>
+          <td><%= JSON.parse(item.Body).download_speed %></td>
+          <td><%= JSON.parse(item.Body).upload_speed %></td>
+          <td><%= JSON.parse(item.Body).ping_latency %> %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</body>
+</html>
