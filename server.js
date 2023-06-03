@@ -26,7 +26,7 @@ app.get('/', async (req, res) => {
     res.render('index', { data: resources });
   });
 
-const port = 3000;
+const port = 8080;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
