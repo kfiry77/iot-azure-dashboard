@@ -72,7 +72,22 @@ td {
   color: #888;
   font-size: 13px;
 }
+
+.content-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.charts-column {
+  flex: 1;
+  min-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </head>
 <body>
   <h1>Speed Test Reports</h1>
@@ -90,6 +105,7 @@ td {
   <% if (data.length === 0) { %>
     <p class="empty-state">No speed test records found for this day.</p>
   <% } else { %>
+  <div class="content-row">
   <table>
     <thead>
       <tr>
@@ -122,6 +138,97 @@ td {
       <% }); %>
     </tbody>
   </table>
+  <div class="charts-column">
+    <canvas id="speedChart"></canvas>
+    <canvas id="latencyChart"></canvas>
+  </div>
+  </div>
+
+  <script>
+    const rows = <%- JSON.stringify(data.map(item => {
+      const body = JSON.parse(item.Body);
+      return {
+        ts: item._ts * 1000,
+        download: body.download_speed,
+        upload: body.upload_speed,
+        latency: body.ping_latency
+      };
+    })) %>.reverse(); // reverse from DESC to chronological order
+
+    const labels = rows.map(r =>
+      new Date(r.ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    );
+
+    new Chart(document.getElementById('speedChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Download (Mbps)',
+            data: rows.map(r => r.download),
+            borderColor: '#4e79a7',
+            backgroundColor: 'rgba(78,121,167,0.08)',
+            tension: 0.3,
+          },
+          {
+            label: 'Upload (Mbps)',
+            data: rows.map(r => r.upload),
+            borderColor: '#f28e2b',
+            backgroundColor: 'rgba(242,142,43,0.08)',
+            tension: 0.3,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { title: { display: true, text: 'Download & Upload Speed (Mbps)' } },
+        scales: {
+          x: {
+            ticks: { display: false }, // hide labels — shown on latency chart below
+            grid: { display: true }
+          },
+          y: {
+            title: { display: true, text: 'Speed (Mbps)' },
+            beginAtZero: true,
+            afterFit(scale) { scale.width = 60; } // fix Y-axis width to align plot areas
+          }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('latencyChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Latency (ms)',
+            data: rows.map(r => r.latency),
+            borderColor: '#e15759',
+            backgroundColor: 'rgba(225,87,89,0.08)',
+            tension: 0.3,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { title: { display: true, text: 'Ping Latency (ms)' } },
+        scales: {
+          x: {
+            ticks: { maxRotation: 45 }
+          },
+          y: {
+            title: { display: true, text: 'Latency (ms)' },
+            beginAtZero: true,
+            afterFit(scale) { scale.width = 60; } // match top chart Y-axis width
+          }
+        }
+      }
+    });
+  </script>
   <% } %>
 </body>
 </html>
