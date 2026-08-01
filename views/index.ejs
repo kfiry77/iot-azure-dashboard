@@ -115,9 +115,9 @@ td {
         <tr>
           <td><%= formatDate(item._ts * 1000)  %></td>
           <td><%= item.SystemProperties['iothub-connection-device-id']  %></td>
-          <td><%= JSON.parse(item.Body).download_speed %></td>
-          <td><%= JSON.parse(item.Body).upload_speed %></td>
-          <td><%= JSON.parse(item.Body).ping_latency %></td>
+          <td><%= Number(JSON.parse(item.Body).download_speed).toFixed(2) %></td>
+          <td><%= Number(JSON.parse(item.Body).upload_speed).toFixed(2) %></td>
+          <td><%= Number(JSON.parse(item.Body).ping_latency).toFixed(2) %></td>
         </tr>
       <% }); %>
     </tbody>
