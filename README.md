@@ -59,11 +59,16 @@ Each IoT message is stored in Cosmos DB with this structure:
 # Install dependencies
 npm install
 
-# Set environment variables (PowerShell)
-$env:COSMOS_ENDPOINT = "https://<account>.documents.azure.com:443/"
-$env:COSMOS_KEY      = "<your-key>"
-$env:COSMOS_DB_ID    = "<database-name>"
-$env:COSMOS_CONTAINER_ID = "<container-name>"
+
+
+# save to .env file: 
+COSMOS_ENDPOINT= "https://<account>.documents.azure.com:443/"
+COSMOS_KEY= "<your-key>"
+COSMOS_DB_ID= "<database-name>"
+COSMOS_CONTAINER_ID= "<container-name>"
+
+# Set environment variables by loading the .env (CMD CLI)
+FOR /F "tokens=*" %I IN ('type .env ^| findstr /v "^#"') DO SET %I
 
 # Start the server
 node server.js
