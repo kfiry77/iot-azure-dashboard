@@ -20,11 +20,43 @@ const client = new CosmosClient({
 });
 
 app.get('/', async (req, res) => {
+  try {
     const container = client.database(config.databaseId).container(config.containerId);
-    const query = 'SELECT * FROM c ORDER BY c._ts DESC'; 
+
+    const toDateString = (d) => d.toISOString().slice(0, 10);
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    // Accept ?date=YYYY-MM-DD; default to today
+    const dateParam = req.query.date;
+    const selectedDate = (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam))
+      ? new Date(dateParam + 'T00:00:00Z')
+      : new Date(today);
+
+    const startTs = Math.floor(selectedDate.getTime() / 1000);
+    const endTs = startTs + 86399; // 23:59:59 of that day
+
+    const query = `SELECT * FROM c WHERE c._ts >= ${startTs} AND c._ts <= ${endTs} ORDER BY c._ts DESC`;
     const { resources } = await container.items.query(query).fetchAll();
-    res.render('index', { data: resources });
-  });
+
+    const prevDate = new Date(selectedDate);
+    prevDate.setUTCDate(prevDate.getUTCDate() - 1);
+    const nextDate = new Date(selectedDate);
+    nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+
+    res.render('index', {
+      data: resources,
+      selectedDate: toDateString(selectedDate),
+      prevDate: toDateString(prevDate),
+      nextDate: toDateString(nextDate),
+      isToday: selectedDate.getTime() === today.getTime(),
+    });
+  } catch (error) {
+    console.error('Dashboard error:', error);
+    res.status(500).send('Failed to load dashboard data');
+  }
+});
 
 app.get('/health', async (req, res) => {
   try {
