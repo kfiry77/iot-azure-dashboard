@@ -155,25 +155,41 @@ td {
       };
     })) %>.reverse(); // reverse from DESC to chronological order
 
-    const labels = rows.map(r =>
-      new Date(r.ts).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-    );
+    // anchor axis from local midnight so 6h steps land exactly on 00/06/12/18
+    const dayStart = new Date(rows[0].ts);
+    dayStart.setHours(0, 0, 0, 0);
+    const minTs = dayStart.getTime();
+    const maxTs = minTs + 24 * 3600 * 1000;
+    const SIX_HOURS = 6 * 3600 * 1000;
+
+    const sharedX = (showLabels) => ({
+      type: 'linear',
+      min: minTs,
+      max: maxTs,
+      ticks: {
+        stepSize: SIX_HOURS,
+        maxRotation: 0,
+        minRotation: 0,
+        display: showLabels,
+        callback: val => new Date(val).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      },
+      grid: { color: 'rgba(0,0,0,0.07)' }
+    });
 
     new Chart(document.getElementById('speedChart'), {
       type: 'line',
       data: {
-        labels,
         datasets: [
           {
             label: 'Download (Mbps)',
-            data: rows.map(r => r.download),
+            data: rows.map(r => ({ x: r.ts, y: r.download })),
             borderColor: '#4e79a7',
             backgroundColor: 'rgba(78,121,167,0.08)',
             tension: 0.3,
           },
           {
             label: 'Upload (Mbps)',
-            data: rows.map(r => r.upload),
+            data: rows.map(r => ({ x: r.ts, y: r.upload })),
             borderColor: '#f28e2b',
             backgroundColor: 'rgba(242,142,43,0.08)',
             tension: 0.3,
@@ -185,14 +201,12 @@ td {
         interaction: { mode: 'index', intersect: false },
         plugins: { title: { display: true, text: 'Download & Upload Speed (Mbps)' } },
         scales: {
-          x: {
-            ticks: { display: false }, // hide labels — shown on latency chart below
-            grid: { display: true }
-          },
+          x: sharedX(false), // labels hidden — shown once on latency chart below
           y: {
             title: { display: true, text: 'Speed (Mbps)' },
             beginAtZero: true,
-            afterFit(scale) { scale.width = 60; } // fix Y-axis width to align plot areas
+            grid: { display: false },
+            afterFit(scale) { scale.width = 60; }
           }
         }
       }
@@ -201,11 +215,10 @@ td {
     new Chart(document.getElementById('latencyChart'), {
       type: 'line',
       data: {
-        labels,
         datasets: [
           {
             label: 'Latency (ms)',
-            data: rows.map(r => r.latency),
+            data: rows.map(r => ({ x: r.ts, y: r.latency })),
             borderColor: '#e15759',
             backgroundColor: 'rgba(225,87,89,0.08)',
             tension: 0.3,
@@ -217,13 +230,12 @@ td {
         interaction: { mode: 'index', intersect: false },
         plugins: { title: { display: true, text: 'Ping Latency (ms)' } },
         scales: {
-          x: {
-            ticks: { maxRotation: 45 }
-          },
+          x: sharedX(true),
           y: {
             title: { display: true, text: 'Latency (ms)' },
             beginAtZero: true,
-            afterFit(scale) { scale.width = 60; } // match top chart Y-axis width
+            grid: { display: false },
+            afterFit(scale) { scale.width = 60; }
           }
         }
       }
